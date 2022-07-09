@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sample</title>
+
+    <!-- for py script -->
+    <link rel="stylesheet" href="https://pyscript.net/alpha/pyscript.css" />
+    <script defer src="https://pyscript.net/alpha/pyscript.js"></script>
+    <py-env>
+        - numpy
+        - pandas
+        - matplotlib
+        - seaborn
+        - scikit-learn
+        - paths:
+            - ./ops.py
+    </py-env>
+</head>
+
+<body>
+    <!-- Start! -->
+    <h1>
+        Hello Datacamp!
+    </h1>
+
+
+    <!-- plt.plot -->
+    <py-script>
+        import numpy as np
+        import matplotlib.pyplot as plt
+        import seaborn as sns
+
+        x = np.random.random(100)
+
+        fig, ax = plt.subplots(ncols=2, figsize=(8, 4))
+
+        ax[0].plot(x)
+        ax[0].set_title('with matplotlib')
+
+        sns.distplot(x, ax=ax[1])
+        ax[1].set_title('with seaborn')
+
+        fig.suptitle('plot with pyscript')
+        
+        fig
+    </py-script output='plot'>
+</body>
+</html>

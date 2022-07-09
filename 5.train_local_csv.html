@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sample</title>
+
+    <!-- for other html things including csv reader -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+    <script type="text/javascript" src="https://unpkg.com/tabulator-tables@4.9.3/dist/js/tabulator.js"></script>
+    <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-2.4.2.js"></script>
+    <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-widgets-2.4.2.min.js"></script>
+    <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-tables-2.4.2.min.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/@holoviz/panel@0.13.0/dist/panel.min.js"></script>
+    <script type="text/javascript">
+        Bokeh.set_log_level("info");
+      </script>
+
+    <!-- for py script -->
+    <link rel="stylesheet" href="https://pyscript.net/alpha/pyscript.css" />
+    <script defer src="https://pyscript.net/alpha/pyscript.js"></script>
+    <py-env>
+        - numpy
+        - pandas
+        - matplotlib
+        - seaborn
+        - panel
+        - scikit-learn
+        - paths:
+            - ./ops.py
+    </py-env>
+</head>
+
+<body>
+    <!-- Start! -->
+    <h1>
+        Hello Datacamp!
+    </h1>
+
+    <!-- modeling for local csv -->
+    <h1>Train and Test csv</h1>
+        <div id="trainInput">train file here</div><br>
+        <div id="testInput">test file here</div><br>
+        <div id="upload"></div>
+        <div id="table"></div>
+
+    <py-script>
+        import asyncio
+        import panel as pn
+        import pandas as pd
+        from panel.io.pyodide import show
+        from ops import get_summary
+
+        trainInput = pn.widgets.FileInput(accept='.csv')
+        testInput = pn.widgets.FileInput(accept='.csv')
+
+        uploadButton = pn.widgets.Button(name='Upload', button_type = 'primary')
+
+        table = pn.widgets.Tabulator(pagination='remote', page_size=10)
+
+        document.getElementById('table').style.display = 'none'
+
+        # read and process csv file here
+        def process_file(event):
+            if trainInput.value is not None and trainInput.value is not None:
+                # load
+                train = pd.read_csv(io.BytesIO(trainInput.value))
+                test = pd.read_csv(io.BytesIO(testInput.value))
+
+                # split
+                tr_X = train.drop('target', axis=1)
+                tr_y = train['target']
+
+                test_X = test.drop('target', axis=1)
+                test_y = test['target']
+
+                # model
+                output = get_summary(tr_X, tr_y, test_X, test_y)
+        
+                for c in output.columns:
+                    output[c] = output[c].map(lambda x: round(x, 3))
+    
+                # write
+                table.value = output
+
+                document.getElementById('table').style.display = 'block'
+
+        uploadButton.on_click(process_file)
+
+        trainInput.innerText = 'aaa'
+        await show(trainInput, 'trainInput')
+        await show(testInput, 'testInput')
+        await show(uploadButton, 'upload')
+        await show(table, 'table')
+    </py-script>
+</body>
+</html>
